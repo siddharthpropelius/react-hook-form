@@ -4,11 +4,12 @@ import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Autocomplete, Button, TextField } from '@mui/material';
 
+
 const formValidation = yup.object().shape({
   firstName: yup.string().required('First Name is  required'),
   lastName: yup.string().required('Last Name is required'),
   city: yup.string().required('City is required'),
-  userName: yup.string().required('User Name is required'),
+  userName: yup.array().of(yup.object().shape({ userName: yup.string().required('User Name is required') }))
 })
 
 const DefaultValues = { firstName: '', lastName: '', city: '', users: [{ userName: '' }] }
@@ -16,7 +17,9 @@ function App() {
   const { register, control, handleSubmit, formState: { errors }, trigger } = useForm({
     resolver: yupResolver(formValidation), defaultValues: DefaultValues
   });
-  const { fields, append } = useFieldArray({ control, name: 'users' })
+  console.log(errors)
+  const { fields, append, remove } = useFieldArray({ control, name: 'users' })
+  console.log(fields)
   const onSubmit = async (data: any) => {
     // trigger will check form validation for every field or we can also specify
     await trigger()
@@ -37,6 +40,7 @@ function App() {
         fields.map((field, index) => (
           <div key={index}>
             <TextField label="User Name" {...register(`users[${index}].userName` as any)} />
+            <Button onClick={() => remove(index)}>delete</Button>
           </div>
         ))
       }
